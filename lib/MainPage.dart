@@ -76,45 +76,54 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     globalContext = context;
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showMyDialog,
+        child: Icon(Icons.settings),
+      ),
       body: Container(
-        color: Colors.black12,
+        color: Colors.black87,
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Text(lastWords, style: TextStyle(fontSize: 20),),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(speechText, style: TextStyle(fontSize: 20),),
-              ),
-              Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                        blurRadius: .26,
-                        spreadRadius: level * 1.5,
-                        color: Colors.black.withOpacity(.05))
-                  ],
-                  color: Colors.white,
-                  borderRadius:
-                  BorderRadius.all(Radius.circular(50)),
+          child:  Card(
+            color: Colors.blueGrey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 8, left: 10, right: 10),
+                  child: Text(lastWords, style: TextStyle(fontSize: 20, color: Colors.blue),),
                 ),
-                child: GestureDetector(
-                  child: IconButton(icon: Icon(Icons.mic)),
-                  onTap: (){
-                    !_hasSpeech || speech.isListening
-                        ? null
-                        : startListening();
-                  },
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 8, left: 20, right: 20),
+                  child: Text(speechText, style: TextStyle(fontSize: 20, color: Colors.white),),
                 ),
-              ),
-            ],
+                Container(
+                  margin: EdgeInsets.only(bottom: 20, top: 10),
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                          blurRadius: .26,
+                          spreadRadius: level * 1.5,
+                          color: Colors.black.withOpacity(.05))
+                    ],
+                    color: Colors.white,
+                    borderRadius:
+                    BorderRadius.all(Radius.circular(50)),
+                  ),
+                  child: GestureDetector(
+                    child: IconButton(icon: Icon(Icons.mic)),
+                    onTap: (){
+                      !_hasSpeech || speech.isListening
+                          ? null
+                          : startListening();
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -235,6 +244,9 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future _speak() async {
+    await flutterTts.setVolume(volume);
+    await flutterTts.setSpeechRate(rate);
+    await flutterTts.setPitch(pitch);
     if(lastStatus=="notListening"){
       stopListening();
       if (_newVoiceText != null) {
@@ -246,5 +258,90 @@ class _MainPageState extends State<MainPage> {
         }
       }
     }
+  }
+
+  //Setting -----
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Audio Setting'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                child: ListBody(
+                  children: <Widget>[
+                    _buildSliders()
+                  ],
+                ),
+              )
+            ],
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSliders() {
+    return Column(
+      children: [_volume(), _pitch(), _rate()],
+    );
+  }
+
+  Widget _volume() {
+    return Slider(
+        value: volume,
+        onChanged: (newVolume) {
+          setState(() => volume = newVolume);
+          Navigator.of(context).pop(); // here I pop to avoid multiple Dialogs
+          _showMyDialog();
+        },
+        min: 0.0,
+        max: 1.0,
+        divisions: 10,
+        label: "Volume: $volume");
+  }
+
+  Widget _pitch() {
+    return Slider(
+      value: pitch,
+      onChanged: (newPitch) {
+        setState(() => pitch = newPitch);
+        Navigator.of(context).pop(); // here I pop to avoid multiple Dialogs
+        _showMyDialog();
+      },
+      min: 0.5,
+      max: 2.0,
+      divisions: 15,
+      label: "Pitch: $pitch",
+      activeColor: Colors.red,
+    );
+  }
+
+  Widget _rate() {
+    return Slider(
+      value: rate,
+      onChanged: (newRate) {
+        setState(() => rate = newRate);
+        Navigator.of(context).pop(); // here I pop to avoid multiple Dialogs
+        _showMyDialog();
+      },
+      min: 0.0,
+      max: 1.0,
+      divisions: 10,
+      label: "Rate: $rate",
+      activeColor: Colors.green,
+    );
   }
 }

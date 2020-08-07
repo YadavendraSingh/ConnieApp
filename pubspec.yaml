@@ -32,6 +32,8 @@ dependencies:
   flutter_tts: ^1.2.6
   gen_lang: ^0.1.3
   intl: ^0.16.1
+  adobe_xd: ^1.0.0+1
+
 
 dev_dependencies:
   flutter_test:
@@ -53,6 +55,8 @@ flutter:
   - sound/speech_to_text_listening.m4r
   - sound/speech_to_text_cancel.m4r
   - sound/speech_to_text_stop.m4r
+  - assets/cloud_up.png
+  - assets/cloud_down.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
